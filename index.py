@@ -1,8 +1,21 @@
 import requests
 import os
+import json
 
+from rich.pretty import pprint
+from pathlib import Path
 
 def is_file_empty(file: str = ""):
+
+def get_latest_file(files: [str] = []):
+    if len(files) == 0:
+        raise ValueError("No files.")
+
+    filepaths = [Path(file) for file in files]
+
+    return max(filepaths, key=lambda file: file.stat().st_mtime)
+
+
     if file == "":
         raise ValueError("No file passed.")
 
