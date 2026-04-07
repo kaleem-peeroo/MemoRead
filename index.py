@@ -5,9 +5,11 @@ import json
 from rich.pretty import pprint
 from pathlib import Path
 
-def is_file_empty(file: str = ""):
 
-def get_latest_file(files: [str] = []):
+def get_latest_file(files: list[str] | None = None) -> Path:
+    if files is None:
+        raise ValueError("No files.")
+
     if len(files) == 0:
         raise ValueError("No files.")
 
@@ -16,6 +18,18 @@ def get_latest_file(files: [str] = []):
     return max(filepaths, key=lambda file: file.stat().st_mtime)
 
 
+def fetch_cached_highlights(cache_dir: str = "./cache/") -> dict:
+    if not os.path.exists(cache_dir):
+        raise ValueError(f"{cache_dir} does NOT exist.")
+
+    cache_files = [os.path.join(cache_dir, file) for file in os.listdir(cache_dir)]
+
+    latest_cache_file = get_latest_file(cache_files)
+
+    return json.loads(latest_cache_file.read_text())
+
+
+def is_file_empty(file: str = "") -> bool:
     if file == "":
         raise ValueError("No file passed.")
 
@@ -25,7 +39,7 @@ def get_latest_file(files: [str] = []):
     return os.path.getsize(file) == 0
 
 
-def cache_files_exist(cache_dir_path: str = "./cache/"):
+def cache_files_exist(cache_dir_path: str = "./cache/") -> bool:
     if not os.path.exists(cache_dir_path):
         raise ValueError(f"{cache_dir_path} does not exist.")
 
@@ -37,8 +51,8 @@ def cache_files_exist(cache_dir_path: str = "./cache/"):
     return all(not is_file_empty(file) for file in files)
 
 
-def fetch_highlights():
-    os.makedirs("./cache/", exist_ok=True)
+def fetch_highlights(cache_dir: str = "./cache/") -> dict:
+    os.makedirs(cache_dir, exist_ok=True)
 
     if cache_files_exist():
         return fetch_cached_highlights()
